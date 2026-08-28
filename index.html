@@ -34,6 +34,30 @@
   }
   ::selection{ background:var(--accent); color:#0a0a09; }
 
+  @media (pointer: fine){
+    a, button, body{ cursor:none; }
+  }
+  .cursor-dot, .cursor-ring{
+    position:fixed; top:0; left:0; z-index:100;
+    pointer-events:none; border-radius:50%;
+    transform:translate(-50%,-50%);
+  }
+  .cursor-dot{
+    width:6px; height:6px; background:var(--cat);
+    box-shadow:0 0 8px var(--cat);
+    transition: background .4s;
+  }
+  .cursor-ring{
+    width:34px; height:34px; border:1px solid var(--cat);
+    opacity:0.9;
+    transition: width .25s ease, height .25s ease, border-color .4s, opacity .3s;
+  }
+  .cursor-ring.hover{ width:56px; height:56px; opacity:0.55; }
+  .cursor-ring.hide, .cursor-dot.hide{ opacity:0; }
+  @media (pointer: coarse){
+    .cursor-dot, .cursor-ring{ display:none; }
+  }
+
   .display{
     font-family:'Bebas Neue', 'Barlow Condensed', sans-serif;
     font-weight:400;
@@ -113,6 +137,18 @@
   }
   .hero-role{ margin-top:30px; font-size:12px; letter-spacing:0.14em; color:var(--muted); font-weight:700;}
   .hero-role b{ display:block; color:var(--ink); font-size:15px; letter-spacing:0.08em; margin-top:6px; font-weight:800; }
+  .hero-scale{
+    transform-origin: top left;
+    transition: transform .05s linear;
+    will-change: transform;
+  }
+  .hero-spine{
+    position:absolute; left:clamp(16px,3vw,40px); top:50%;
+    transform:translateY(-50%) rotate(180deg); writing-mode:vertical-rl;
+    font-size:11px; font-weight:800; letter-spacing:0.28em; color:var(--muted);
+    opacity:0; transition:opacity .5s ease;
+  }
+  .hero-spine.show{ opacity:1; }
   .hero-year{
     position:absolute; right:clamp(10px,3vw,40px); bottom:30px;
     font-family:'Bebas Neue', sans-serif; font-size:min(30vw,300px); color:transparent;
@@ -309,6 +345,8 @@
 
 <div class="grain"></div>
 <div class="vignette"></div>
+<div class="cursor-ring hide" id="cursor-ring"></div>
+<div class="cursor-dot hide" id="cursor-dot"></div>
 
 <div class="hud">
   <div class="hud-left"><span class="hud-dot"></span>KRISHI.DEV</div>
@@ -325,10 +363,13 @@
       Y 72.8311&deg; E<br>
       Z SURAT, IN
     </div>
-    <div class="hero-eyebrow"><span class="rule"></span>00 / HERO</div>
-    <h1 class="display">KRISHI<span class="line2">PATEL</span></h1>
-    <p class="hero-tag">Building interfaces that just work &mdash; then learning why they should work better.</p>
-    <div class="hero-role">ROLE<b>FRONTEND ENGINEER &middot; MCA STUDENT</b></div>
+    <div class="hero-scale" id="hero-scale">
+      <div class="hero-eyebrow"><span class="rule"></span>00 / HERO</div>
+      <h1 class="display">KRISHI<span class="line2">PATEL</span></h1>
+      <p class="hero-tag">Building interfaces that just work &mdash; then learning why they should work better.</p>
+      <div class="hero-role">ROLE<b>FRONTEND ENGINEER &middot; MCA STUDENT</b></div>
+    </div>
+    <div class="hero-spine">00 / HERO</div>
     <div class="hero-year display">2026</div>
     <div class="hero-scroll">SCROLL</div>
   </section>
@@ -538,4 +579,58 @@
     bi = (bi+1) % badges.length;
     statusEl.innerHTML = `<span class="hud-dot"></span>${badges[bi]}`;
   }, 3200);
+
+  // ---- custom cursor: dot snaps to the pointer, ring eases toward it ----
+  const cursorDot = document.getElementById('cursor-dot');
+  const cursorRing = document.getElementById('cursor-ring');
+  const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
+  if (hasFinePointer) {
+    let mouseX = window.innerWidth/2, mouseY = window.innerHeight/2;
+    let ringX = mouseX, ringY = mouseY;
+    let seen = false;
+
+    window.addEventListener('mousemove', (e)=>{
+      mouseX = e.clientX; mouseY = e.clientY;
+      cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%,-50%)`;
+      if (!seen){ seen = true; cursorDot.classList.remove('hide'); cursorRing.classList.remove('hide'); }
+    }, { passive:true });
+
+    document.addEventListener('mouseleave', ()=>{ cursorDot.classList.add('hide'); cursorRing.classList.add('hide'); });
+    document.addEventListener('mouseenter', ()=>{ cursorDot.classList.remove('hide'); cursorRing.classList.remove('hide'); });
+
+    function raf(){
+      ringX += (mouseX - ringX) * 0.16;
+      ringY += (mouseY - ringY) * 0.16;
+      cursorRing.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%,-50%)`;
+      requestAnimationFrame(raf);
+    }
+    raf();
+
+    const hoverables = 'a, button, .p-btn, .c-row, .cat-tags span';
+    document.addEventListener('mouseover', (e)=>{
+      if (e.target.closest(hoverables)) cursorRing.classList.add('hover');
+    });
+    document.addEventListener('mouseout', (e)=>{
+      if (e.target.closest(hoverables)) cursorRing.classList.remove('hover');
+    });
+  } else {
+    cursorDot.style.display = 'none';
+    cursorRing.style.display = 'none';
+  }
+
+  // ---- hero: subtle scale/settle as the page starts scrolling, spine label fades in ----
+  const heroScale = document.getElementById('hero-scale');
+  const heroSpine = document.querySelector('.hero-spine');
+  function onHeroScroll(){
+    const y = window.scrollY;
+    const range = 480;
+    const p = Math.min(1, y / range);
+    const scale = 1 - p * 0.16;
+    const shift = p * 18;
+    heroScale.style.transform = `scale(${scale}) translateY(${-shift}px)`;
+    heroScale.style.opacity = String(1 - p * 0.35);
+    heroSpine.classList.toggle('show', p > 0.08);
+  }
+  window.addEventListener('scroll', onHeroScroll, { passive:true });
+  onHeroScroll();
 </script>
