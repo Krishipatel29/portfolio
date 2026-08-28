@@ -104,12 +104,47 @@
     box-shadow:0 0 10px var(--cat);
     transition: background .5s, box-shadow .5s;
   }
-  .hud-left{ color:var(--cat); transition:color .5s; display:flex; align-items:center; }
-  .hud-mid{ display:flex; align-items:center; gap:14px; color:var(--muted); }
-  .hud-mid .rule{ width:34px; height:1px; background:var(--line-strong); }
+  .hud-left{ color:var(--cat); transition:color .5s; display:flex; align-items:center; text-decoration:none; pointer-events:auto; cursor:pointer; }
+  .hud-nav{ display:flex; align-items:center; gap:30px; pointer-events:auto; }
+  .hud-nav a{
+    color:var(--muted); text-decoration:none; font-family:'Barlow',sans-serif;
+    font-weight:800; font-size:11px; letter-spacing:0.16em; text-transform:uppercase;
+    transition:color .3s; padding:4px 0; position:relative;
+  }
+  .hud-nav a::after{
+    content:''; position:absolute; left:0; right:100%; bottom:-2px; height:1px;
+    background:var(--accent); transition:right .3s ease;
+  }
+  .hud-nav a:hover, .hud-nav a.active{ color:var(--ink); }
+  .hud-nav a.active::after{ right:0; }
+  .hud-right-group{ display:flex; align-items:center; gap:20px; pointer-events:auto; }
   .hud-right{ display:flex; align-items:center; gap:9px; color:var(--ink-dim); }
+  .hud-menu-btn{
+    display:none; flex-direction:column; justify-content:center; gap:5px;
+    width:26px; height:20px; background:none; border:none; cursor:pointer; padding:0;
+    pointer-events:auto;
+  }
+  .hud-menu-btn span{ width:100%; height:2px; background:var(--ink); display:block; transition:transform .3s, opacity .3s; }
 
-  section{ position:relative; z-index:2; }
+  .mobile-nav{
+    position:fixed; inset:0; z-index:90; background:var(--bg);
+    display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:20px;
+    padding:32px clamp(24px,6vw,56px);
+    transform:translateY(-100%); transition:transform .5s cubic-bezier(.65,0,.35,1);
+  }
+  .mobile-nav.open{ transform:translateY(0); }
+  .mobile-nav a{
+    font-family:'Bebas Neue', sans-serif; font-size:clamp(38px,11vw,58px);
+    color:var(--ink); text-decoration:none; text-transform:uppercase; transition:color .25s;
+  }
+  .mobile-nav a.active{ color:var(--accent); }
+  .mobile-nav-close{
+    position:absolute; top:22px; right:clamp(20px,4vw,56px);
+    background:none; border:none; color:var(--ink); font-size:34px; line-height:1; cursor:pointer;
+  }
+
+  html{ scroll-behavior:smooth; }
+  section{ position:relative; z-index:2; scroll-margin-top:88px; }
 
   /* ---------- HERO ---------- */
   .hero{
@@ -357,8 +392,9 @@
 
   @media (max-width: 640px){
     .hud{ padding:16px 18px; font-size:9px; letter-spacing:0.08em; }
-    .hud-mid{ display:none; }
+    .hud-nav{ display:none; }
     .hud-right{ max-width:38vw; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+    .hud-menu-btn{ display:flex; }
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -372,10 +408,29 @@
 <div class="cursor-dot hide" id="cursor-dot"></div>
 
 <div class="hud">
-  <div class="hud-left"><span class="hud-dot"></span>KRISHI.DEV</div>
-  <div class="hud-mid"><span class="rule"></span>PORTFOLIO 2026<span class="rule"></span></div>
-  <div class="hud-right" id="hud-status"><span class="hud-dot"></span>AVAILABLE FOR INTERNSHIPS</div>
+  <a href="#hero" class="hud-left"><span class="hud-dot"></span>KRISHI.DEV</a>
+  <nav class="hud-nav" aria-label="Section navigation">
+    <a href="#projects">Projects</a>
+    <a href="#stack">Stack</a>
+    <a href="#education">Education</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <div class="hud-right-group">
+    <div class="hud-right" id="hud-status"><span class="hud-dot"></span>AVAILABLE FOR INTERNSHIPS</div>
+    <button class="hud-menu-btn" id="menu-toggle" aria-label="Open menu"><span></span><span></span></button>
+  </div>
 </div>
+
+<nav class="mobile-nav" id="mobile-nav" aria-label="Mobile section navigation">
+  <button class="mobile-nav-close" id="menu-close" aria-label="Close menu">&times;</button>
+  <a href="#hero">Home</a>
+  <a href="#projects">Projects</a>
+  <a href="#stack">Stack</a>
+  <a href="#education">Education</a>
+  <a href="#about">About</a>
+  <a href="#contact">Contact</a>
+</nav>
 
 <main>
 
@@ -492,7 +547,7 @@
   </section>
 
   <!-- ABOUT -->
-  <section class="about">
+  <section class="about" id="about">
     <div class="about-side reveal">
       <div class="about-eyebrow">03 / ABOUT<span class="rule"></span></div>
       <div class="about-num display">03</div>
@@ -541,7 +596,7 @@
   </section>
 
   <!-- CONTACT -->
-  <section class="contact">
+  <section class="contact" id="contact">
     <div class="contact-watermark display">HELLO</div>
     <div class="contact-head reveal">
       <div class="sec-num">05 / CONTACT</div>
@@ -739,6 +794,39 @@
     }
     scramble(l1, finalLine1, 0);
     scramble(l2, finalLine2, 140);
+  })();
+
+  // ---- top nav: mobile menu open/close + scrollspy active state ----
+  (function(){
+    const menuBtn = document.getElementById('menu-toggle');
+    const menuClose = document.getElementById('menu-close');
+    const mobileNav = document.getElementById('mobile-nav');
+    if (menuBtn && mobileNav){
+      menuBtn.addEventListener('click', () => mobileNav.classList.add('open'));
+    }
+    if (menuClose && mobileNav){
+      menuClose.addEventListener('click', () => mobileNav.classList.remove('open'));
+    }
+    if (mobileNav){
+      mobileNav.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => mobileNav.classList.remove('open'));
+      });
+    }
+
+    const navLinks = document.querySelectorAll('.hud-nav a, .mobile-nav a');
+    const spySections = ['hero','projects','stack','education','about','contact']
+      .map(id => document.getElementById(id)).filter(Boolean);
+    function setActive(id){
+      navLinks.forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+      });
+    }
+    if (spySections.length && 'IntersectionObserver' in window){
+      const spy = new IntersectionObserver((entries) => {
+        entries.forEach(entry => { if (entry.isIntersecting) setActive(entry.target.id); });
+      }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+      spySections.forEach(s => spy.observe(s));
+    }
   })();
 </script>
 
