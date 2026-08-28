@@ -177,6 +177,23 @@
   .sec-count{ font-size:16px; color:var(--muted); font-weight:600; }
   .sec-sub{ margin-top:18px; font-size:14px; letter-spacing:0.05em; color:var(--ink-dim); text-transform:uppercase; font-weight:700; }
 
+  /* ---------- EDUCATION ---------- */
+  .edu-list{ padding: 0 clamp(20px,4vw,56px); }
+  .edu-row{
+    display:grid; grid-template-columns: 90px 1fr auto; gap:24px; align-items:baseline;
+    padding: 44px 0; border-bottom:1px solid var(--line);
+  }
+  .edu-row:last-child{ border-bottom:none; }
+  .edu-idx{ font-size:13px; font-weight:800; color:var(--muted); }
+  .edu-degree{ font-size:clamp(24px,3.2vw,36px); text-transform:uppercase; margin:0 0 8px; }
+  .edu-inst{ font-size:15px; color:var(--ink-dim); font-weight:600; margin-bottom:6px; }
+  .edu-score{ font-size:13px; color:var(--accent); font-weight:700; letter-spacing:0.03em; }
+  .edu-years{ font-size:13px; color:var(--muted); font-weight:700; letter-spacing:0.06em; white-space:nowrap; text-align:right; }
+  @media (max-width:640px){
+    .edu-row{ grid-template-columns:1fr; gap:8px; }
+    .edu-years{ text-align:left; }
+  }
+
   /* ---------- PROJECTS ---------- */
   .project{
     display:grid; grid-template-columns: 1fr 1fr; gap:60px; align-items:center;
@@ -492,11 +509,42 @@
     </div>
   </section>
 
+  <!-- EDUCATION -->
+  <section id="education">
+    <div class="sec-head reveal">
+      <div class="sec-num">04 / EDUCATION</div>
+      <div class="sec-title-wrap">
+        <h2 class="sec-title display"><span class="strike">STILL</span> LEARNING</h2>
+        <span class="sec-count">(2)</span>
+      </div>
+      <div class="sec-sub">Classroom fundamentals, backed by projects built outside of it.</div>
+    </div>
+    <div class="edu-list">
+      <div class="edu-row reveal">
+        <div class="edu-idx">01</div>
+        <div>
+          <h3 class="edu-degree display">Master of Computer Applications (MCA)</h3>
+          <div class="edu-inst">Veer Narmad South Gujarat University (VNSGU), Surat</div>
+        </div>
+        <div class="edu-years">2025 &ndash; 2027<br><span style="color:var(--muted); font-weight:600;">(Expected)</span></div>
+      </div>
+      <div class="edu-row reveal">
+        <div class="edu-idx">02</div>
+        <div>
+          <h3 class="edu-degree display">Bachelor of Computer Applications (BCA)</h3>
+          <div class="edu-inst">Shree Uttar Gujarat BCA College, Surat &mdash; Affiliated to VNSGU</div>
+          <div class="edu-score">CGPA 7.48 / 10 (74.80%) &middot; First Class with Distinction</div>
+        </div>
+        <div class="edu-years">2022 &ndash; 2025</div>
+      </div>
+    </div>
+  </section>
+
   <!-- CONTACT -->
   <section class="contact">
     <div class="contact-watermark display">HELLO</div>
     <div class="contact-head reveal">
-      <div class="sec-num">04 / CONTACT</div>
+      <div class="sec-num">05 / CONTACT</div>
       <h2 class="display">LET'S BUILD<br>SOMETHING <span class="hl">REAL</span>.</h2>
       <p class="contact-sub">Open to internships &mdash; product-based, service-based, doesn't matter. Or just say hello.</p>
     </div>
