@@ -1,9 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
 <title>Krishi Patel</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
+</head>
+<body>
 <style>
   :root{
     --bg:#0a0a09;
@@ -365,7 +371,7 @@
     </div>
     <div class="hero-scale" id="hero-scale">
       <div class="hero-eyebrow"><span class="rule"></span>00 / HERO</div>
-      <h1 class="display">KRISHI<span class="line2">PATEL</span></h1>
+      <h1 class="display" id="hero-name">KRISHI<span class="line2">PATEL</span></h1>
       <p class="hero-tag">Building interfaces that just work &mdash; then learning why they should work better.</p>
       <div class="hero-role">ROLE<b>FRONTEND ENGINEER &middot; MCA STUDENT</b></div>
     </div>
@@ -633,4 +639,56 @@
   }
   window.addEventListener('scroll', onHeroScroll, { passive:true });
   onHeroScroll();
+
+  // ---- hero name: scramble/decrypt reveal on load (settles letter by letter) ----
+  (function(){
+    const h1 = document.getElementById('hero-name');
+    if (!h1) return;
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const line2El = h1.querySelector('.line2');
+    const finalLine1 = 'KRISHI';
+    const finalLine2 = line2El ? line2El.textContent : 'PATEL';
+    if (reduceMotion) return;
+
+    h1.innerHTML = '<span class="scr" id="scr-l1"></span><span class="line2 scr" id="scr-l2"></span>';
+    const l1 = document.getElementById('scr-l1');
+    const l2 = document.getElementById('scr-l2');
+
+    const GLYPHS = '#$%&*+=<>/\\{}[]01?—';
+    function scramble(el, text, delay){
+      const len = text.length;
+      const stagger = 34;
+      const settleDur = 260;
+      const start = performance.now() + delay;
+      function tick(now){
+        const t = now - start;
+        if (t < 0){ el.textContent = text.replace(/./g, () => GLYPHS[(Math.random()*GLYPHS.length)|0]); requestAnimationFrame(tick); return; }
+        let out = '';
+        let allDone = true;
+        for (let i = 0; i < len; i++){
+          const ch = text[i];
+          if (ch === ' '){ out += ' '; continue; }
+          const cStart = i * stagger;
+          if (t < cStart){
+            out += GLYPHS[(Math.random()*GLYPHS.length)|0];
+            allDone = false;
+          } else if (t < cStart + settleDur){
+            out += Math.random() < 0.45 ? ch : GLYPHS[(Math.random()*GLYPHS.length)|0];
+            allDone = false;
+          } else {
+            out += ch;
+          }
+        }
+        el.textContent = out;
+        if (!allDone) requestAnimationFrame(tick);
+        else el.textContent = text;
+      }
+      requestAnimationFrame(tick);
+    }
+    scramble(l1, finalLine1, 0);
+    scramble(l2, finalLine2, 140);
+  })();
 </script>
+
+</body>
+</html>
